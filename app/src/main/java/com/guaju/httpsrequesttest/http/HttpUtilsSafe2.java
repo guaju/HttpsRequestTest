@@ -5,6 +5,7 @@ import android.content.Context;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -16,21 +17,22 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Created by guaju on 2017/11/7.
- * https负责任的一个请求类
+ * https2负责任的一个请求类
  *
  */
 
-public class HttpUtilsSafe {
-    private static HttpUtilsSafe httpUtils;
-    private HttpUtilsSafe(){
+public class HttpUtilsSafe2 {
+    private static HttpUtilsSafe2 httpUtils;
+    private HttpUtilsSafe2(){
 
     }
-    public static HttpUtilsSafe getInstance(){
+    public static HttpUtilsSafe2 getInstance(){
         if (httpUtils==null){
-            httpUtils=new HttpUtilsSafe();
+            httpUtils=new HttpUtilsSafe2();
         }
         return httpUtils;
     }
@@ -51,9 +53,19 @@ public class HttpUtilsSafe {
                     HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                     //2.SSLContext 初始化
                     SSLContext tls = SSLContext.getInstance("TLS");
-                    MyX509TrustManager myX509TrustManager = new MyX509TrustManager(getX509Certificate(context));
 
-                    TrustManager[] trustManagers={myX509TrustManager};
+
+                    String defaultType = KeyStore.getDefaultType();
+                    KeyStore instance = KeyStore.getInstance(defaultType);
+                    instance.load(null);
+                    instance.setCertificateEntry("srca",getX509Certificate(context));
+
+                    String defaultAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+                    TrustManagerFactory trustMF = TrustManagerFactory.getInstance(defaultAlgorithm);
+                    trustMF.init(instance);
+                    TrustManager[] trustManagers = trustMF.getTrustManagers();
+
+
                     tls.init(null,trustManagers,new SecureRandom());
                     //3.ssl工厂
                     SSLSocketFactory factory = tls.getSocketFactory();
@@ -61,18 +73,24 @@ public class HttpUtilsSafe {
                     conn.setHostnameVerifier(new HostnameVerifier() {
                         @Override
                         public boolean verify(String hostname, SSLSession session) {
-                                if (hostname.equals("kyfw.12306.cn")) {
-                                return true;
+                            if (hostname.equals("kyfw.12306.cn")) {
+                                    return true;
                             }else{
-                                return false;
+                                    return false;
                                 }
 
                         }
                     });
+
+
+
                     conn.setSSLSocketFactory(factory);
+                    
                     conn.setRequestMethod("GET");
                     conn.setReadTimeout(5000);
                     conn.setConnectTimeout(5000);
+                    conn.setDoInput(true);
+                    conn.setDoOutput(true);
                     conn.connect();
                     InputStream inputStream = conn.getInputStream();
 

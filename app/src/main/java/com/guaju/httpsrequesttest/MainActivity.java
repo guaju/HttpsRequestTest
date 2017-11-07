@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.guaju.httpsrequesttest.http.HttpUtilsSafe;
+import com.guaju.httpsrequesttest.http.HttpUtilsSafe2;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void connect(View v){
         String path = et.getText().toString().trim();
-        HttpUtilsSafe.getInstance().get(this,path, new HttpUtilsSafe.OnRequestCallBack() {
+        HttpUtilsSafe2.getInstance().get(this,path, new HttpUtilsSafe2.OnRequestCallBack() {
             @Override
             public void onSuccess(final  String s) {
                 mHandler.post(new Runnable() {
