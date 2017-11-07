@@ -53,14 +53,14 @@ public class HttpUtilsSafe2 {
                     HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
                     //2.SSLContext 初始化
                     SSLContext tls = SSLContext.getInstance("TLS");
-
+                    //3.定义一个 TrustManagerFactory,让这个工厂生成TrustManager数组
 
                     String defaultType = KeyStore.getDefaultType();
                     KeyStore instance = KeyStore.getInstance(defaultType);
                     instance.load(null);
                     instance.setCertificateEntry("srca",getX509Certificate(context));
 
-                    String defaultAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+                    String defaultAlgorithm = TrustManagerFactory.getDefaultAlgorithm();//得到默认算法
                     TrustManagerFactory trustMF = TrustManagerFactory.getInstance(defaultAlgorithm);
                     trustMF.init(instance);
                     TrustManager[] trustManagers = trustMF.getTrustManagers();
